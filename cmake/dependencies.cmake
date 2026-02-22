@@ -1,0 +1,7 @@
+find_package(CUDAToolkit REQUIRED)
+list(APPEND COMMON_INCLUDE_DIRS ${CUDAToolkit_INCLUDE_DIRS})
+list(APPEND COMMON_LIBRARIES CUDA::cudart CUDA::cublas)
+
+
+
+
