@@ -31,6 +31,23 @@ struct MHAParams {
   Stride k_stride;
   Stride v_stride;
   Stride o_stride;
+
+  void normalize() {
+    group_size = n_heads / n_kv_heads;
+
+    if (logits_soft_cap > 0.0) {
+      //    Softmax(x * sm_scale) + apply_logits_soft_cap
+      // => Softmax(Tanh(x * sm_scale / soft_cap) * soft_cap)
+      // => Softmax(S' * sm_scale) where
+      //    S'        = Tanh(x * sm_scale / soft_cap)
+      //              = Tanh(x * soft_cap')
+      //    soft_cap' = sm_scale / soft_cap
+      //    sm_scale' = soft_cap
+      const auto sm_scale_hat = logits_soft_cap;
+      logits_soft_cap = sm_scale / logits_soft_cap;
+      sm_scale = sm_scale_hat;
+    }
+  }
 };
 
 } // namespace llmx

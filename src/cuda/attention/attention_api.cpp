@@ -43,7 +43,6 @@ void llmx_single_mha_attention(
   params.kv_len = kv_len;
   params.n_heads = n_heads;
   params.n_kv_heads = n_kv_heads;
-  params.group_size = n_heads / n_kv_heads;
   params.sm_scale = sm_scale;
   params.sliding_window = sliding_window;
   params.logits_soft_cap = logits_soft_cap;
@@ -61,6 +60,7 @@ void llmx_single_mha_attention(
         LLMX_DISPATCH_BOOL(params.alibi_slopes_ptr != nullptr, ALIBI, [&] {
           LLMX_DISPATCH_BOOL(logits_soft_cap > 0, SOFT_CAP, [&] {
             LLMX_DISPATCH_BOOL(sliding_window >= 0, LOCAL, [&] {
+              params.normalize();
               single_mha_attention_launcher<ELEMENT, HEAD_DIM, EVEN_K, ALIBI,
                                             SOFT_CAP, LOCAL>(params, stream);
             });
